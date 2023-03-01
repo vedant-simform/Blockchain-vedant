@@ -1,6 +1,7 @@
 const { sha256 } = require("js-sha256");
-console.log("Starting Mining...");
 const chain = [];
+let difficulty = Math.floor(Math.random() * 4 + 1);
+
 // Adding new block into blockchain
 function addingBlock(transaction) {
   const block = {
@@ -23,14 +24,7 @@ function addingBlock(transaction) {
   );
   chain.push(block);
 }
-
-//Generate Difficulty
-function generateNonceDifficulty() {
-  return Math.floor(Math.random() * 4);
-}
-
 function generateCurrentHash(id, timeStemp, transaction, previousHash) {
-  let difficulty = generateNonceDifficulty();
   let tempNonce = 0;
   while (
     sha256("" + id + tempNonce + timeStemp + transaction + previousHash).slice(
@@ -51,12 +45,66 @@ function generatePreviousHash(id) {
     : chain[id - 2].currentHash;
 }
 function generateTransactionHash(transaction) {
-  return sha256(transaction);
+  let output = "";
+  if (transaction.length === 0) return sha256(" ");
+  if (transaction.length === 1) {
+    return sha256(transaction[0]);
+  }
+  if (transaction.length % 2 != 0) {
+    transaction.push(transaction[transaction.length - 1]);
+  }
+  let newPair = [];
+  for (let i = 0; i < transaction.length; i += 2) {
+    let leftNode = transaction[i];
+    let rightNode = transaction[i + 1];
+    let computedHash = sha256(leftNode + rightNode);
+    newPair.push(computedHash);
+  }
+  output = generateTransactionHash(newPair);
+  return output;
 }
 
-addingBlock("Transaction :- Vedant to Raj => 50$");
-addingBlock("Transaction :- Raj to Raj => 65$");
-addingBlock("Transaction :- Raj to Vedant => 30$");
-addingBlock("Transaction :- Vedant to Raj => 75$");
+addingBlock([
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Raj to Raj => 65$",
+  "Transaction :- Vedant to Raj => 75$",
+  "Transaction :- Soni to Raj => 550$",
+  "Transaction :- Vedant to Raj => 59$",
+]);
+addingBlock([
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Raj to Raj => 65$",
+  "Transaction :- Vedant to Raj => 15$",
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Vedant to Raj => 50$",
+]);
+addingBlock([
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Raj to Raj => 65$",
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Vedant to Raj => 5$",
+]);
+addingBlock([
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Raj to Raj => 65$",
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Vedant to Raj => 50$",
+  "Transaction :- Vedant to Raj => 53$",
+]);
+
 console.log(chain);
-console.log("Mining Completed...");
+
+function verification() {
+  for (let i = 0; i < chain.length - 1; i++) {
+    if (chain[i].currentHash != chain[i + 1].previousHash) {
+      console.log("Block is tempered");
+    } else {
+      console.log("Block mining is successfull");
+    }
+  }
+}
+
+verification();
+chain[2].currentHash = 10;
+verification();
