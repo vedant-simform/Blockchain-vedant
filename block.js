@@ -1,41 +1,61 @@
 const { sha256 } = require("js-sha256");
-
+console.log("Starting Mining...");
 const chain = [];
-function createBlockchain(nonce, transaction, id = chain.length + 1) {
+function createBlockchain(transaction) {
   const block = {
     id: "",
     nonce: "",
+    timeStemp: "",
     transaction: "",
     previousHash: "",
     currentHash: "",
   };
-  block.id = id;
-  block.nonce = nonce;
-  block.transaction = transaction;
-  block.previousHash = previosHashGenerate(id);
-  block.currentHash = currentHashGenerate(
+  block.id = chain.length + 1;
+  block.timeStemp = Date().slice(16, 24);
+  block.transaction = generateTransactionHash(transaction);
+  block.previousHash = generatePreviousHash(block.id);
+  [block.currentHash, block.nonce] = generateCurrentHash(
     block.id,
-    block.nonce,
+    block.timeStemp,
     block.transaction,
     block.previousHash
   );
   chain.push(block);
 }
 
-function currentHashGenerate(id, nonce, transaction, previousHash) {
-  return sha256("" + id + nonce + transaction + previousHash);
+function generateNonceDifficulty() {
+  return Math.floor(Math.random() * 4);
 }
-function previosHashGenerate(id) {
-  if (id == 1) {
-    return "0000000000000000000000000000000000000000000000000000000000000000";
-  } else {
-    return chain[id - 2].currentHash;
-  }
-}
-function transactionGenerate() {}
 
-createBlockchain(2056, "Transaction :- Vedant to Raj => 50$");
-createBlockchain(1906, "Transaction :- Raj to Raj => 65$");
-createBlockchain(3003, "Transaction :- Raj to Vedant => 30$");
-createBlockchain(7510, "Transaction :- Vedant to Raj => 75$");
+function generateCurrentHash(id, timeStemp, transaction, previousHash) {
+  let difficulty = generateNonceDifficulty();
+  let tempNonce = 0;
+
+  while (
+    sha256("" + id + tempNonce + timeStemp + transaction + previousHash).slice(
+      0,
+      difficulty
+    ) != Array(difficulty + 1).join("0")
+  ) {
+    tempNonce++;
+  }
+  return [
+    sha256("" + id + timeStemp + tempNonce + transaction + previousHash),
+    tempNonce,
+  ];
+}
+function generatePreviousHash(id) {
+  return id == 1
+    ? "0000000000000000000000000000000000000000000000000000000000000000"
+    : chain[id - 2].currentHash;
+}
+function generateTransactionHash(transaction) {
+  return sha256(transaction);
+}
+
+createBlockchain("Transaction :- Vedant to Raj => 50$");
+createBlockchain("Transaction :- Raj to Raj => 65$");
+createBlockchain("Transaction :- Raj to Vedant => 30$");
+createBlockchain("Transaction :- Vedant to Raj => 75$");
 console.log(chain);
+console.log("Mining Completed...");
