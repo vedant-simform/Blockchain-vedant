@@ -3,13 +3,22 @@ const { sha256 } = require("js-sha256");
 const chain = [];
 function createBlockchain(nonce, transaction, id = chain.length + 1) {
   const block = {
-    id: id,
-    nonce: nonce,
-    transaction: transaction,
-    previousHash: previosHashGenerate(id),
-    currentHash: currentHashGenerate(id, nonce, transaction, this.previousHash),
+    id: "",
+    nonce: "",
+    transaction: "",
+    previousHash: "",
+    currentHash: "",
   };
-
+  block.id = id;
+  block.nonce = nonce;
+  block.transaction = transaction;
+  block.previousHash = previosHashGenerate(id);
+  block.currentHash = currentHashGenerate(
+    block.id,
+    block.nonce,
+    block.transaction,
+    block.previousHash
+  );
   chain.push(block);
 }
 
@@ -20,16 +29,13 @@ function previosHashGenerate(id) {
   if (id == 1) {
     return "0000000000000000000000000000000000000000000000000000000000000000";
   } else {
-    console.log(id);
-    console.log(chain[id - 1]);
-    return "hello";
-    // return chain[id - 1].currentHash;
+    return chain[id - 2].currentHash;
   }
 }
 function transactionGenerate() {}
 
-createBlockchain(10, 20);
-createBlockchain();
-createBlockchain();
-createBlockchain();
+createBlockchain(2056, "Transaction :- Vedant to Raj => 50$");
+createBlockchain(1906, "Transaction :- Raj to Raj => 65$");
+createBlockchain(3003, "Transaction :- Raj to Vedant => 30$");
+createBlockchain(7510, "Transaction :- Vedant to Raj => 75$");
 console.log(chain);
