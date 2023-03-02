@@ -71,6 +71,7 @@ addingBlock([
   "Transaction :- Soni to Raj => 550$",
   "Transaction :- Vedant to Raj => 59$",
 ]);
+
 addingBlock([
   "Transaction :- Vedant to Raj => 50$",
   "Transaction :- Raj to Raj => 65$",
@@ -99,12 +100,24 @@ function verification() {
   for (let i = 0; i < chain.length - 1; i++) {
     if (chain[i].currentHash != chain[i + 1].previousHash) {
       console.log("Block is tempered");
+      break;
     } else {
-      console.log("Block mining is successfull");
+      console.log("Block mining is successfull ===>>");
     }
   }
 }
-
 verification();
-chain[2].currentHash = 10;
+console.log("After tempering random Block");
+function tempereBlock() {
+  let id_num = Math.floor(Math.random() * 4);
+  chain[id_num].transaction = generateTransactionHash(["Double Payment"]);
+  [chain[id_num].currentHash, chain[id_num].nonce] = generateCurrentHash(
+    chain[id_num].id,
+    chain[id_num].timeStemp,
+    chain[id_num].transaction,
+    chain[id_num].previousHash
+  );
+}
+tempereBlock();
+console.log(chain);
 verification();
