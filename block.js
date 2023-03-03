@@ -1,5 +1,5 @@
 const { sha256 } = require("js-sha256");
-const chain = [];
+const blockchain = [];
 let difficulty = Math.floor(Math.random() * 4 + 1);
 
 // Adding new block into blockchain
@@ -12,7 +12,7 @@ function addingBlock(transaction) {
     previousHash: "",
     currentHash: "",
   };
-  block.id = chain.length + 1;
+  block.id = blockchain.length + 1;
   block.timeStemp = Date().slice(16, 24);
   block.transaction = generateTransactionHash(transaction);
   block.previousHash = generatePreviousHash(block.id);
@@ -22,7 +22,7 @@ function addingBlock(transaction) {
     block.transaction,
     block.previousHash
   );
-  chain.push(block);
+  blockchain.push(block);
 }
 function generateCurrentHash(id, timeStemp, transaction, previousHash) {
   let tempNonce = 0;
@@ -42,7 +42,7 @@ function generateCurrentHash(id, timeStemp, transaction, previousHash) {
 function generatePreviousHash(id) {
   return id == 1
     ? "0000000000000000000000000000000000000000000000000000000000000000"
-    : chain[id - 2].currentHash;
+    : blockchain[id - 2].currentHash;
 }
 function generateTransactionHash(transaction) {
   let output = "";
@@ -57,7 +57,7 @@ function generateTransactionHash(transaction) {
   for (let i = 0; i < transaction.length; i += 2) {
     let leftNode = transaction[i];
     let rightNode = transaction[i + 1];
-    let computedHash = sha256(leftNode + rightNode);
+    let computedHash = sha256(sha256(leftNode) + sha256(rightNode));
     newPair.push(computedHash);
   }
   output = generateTransactionHash(newPair);
@@ -94,11 +94,11 @@ addingBlock([
   "Transaction :- Vedant to Raj => 53$",
 ]);
 
-console.log(chain);
+console.log(blockchain);
 
 function verification() {
-  for (let i = 0; i < chain.length - 1; i++) {
-    if (chain[i].currentHash != chain[i + 1].previousHash) {
+  for (let i = 0; i < blockchain.length - 1; i++) {
+    if (blockchain[i].currentHash != blockchain[i + 1].previousHash) {
       console.log("Block is tempered");
       break;
     } else {
@@ -109,15 +109,16 @@ function verification() {
 verification();
 console.log("After tempering random Block");
 function tempereBlock() {
-  let id_num = Math.floor(Math.random() * 4);
-  chain[id_num].transaction = generateTransactionHash(["Double Payment"]);
-  [chain[id_num].currentHash, chain[id_num].nonce] = generateCurrentHash(
-    chain[id_num].id,
-    chain[id_num].timeStemp,
-    chain[id_num].transaction,
-    chain[id_num].previousHash
-  );
+  let blockID = Math.floor(Math.random() * 4);
+  blockchain[blockID].transaction = generateTransactionHash(["Double Payment"]);
+  [blockchain[blockID].currentHash, blockchain[blockID].nonce] =
+    generateCurrentHash(
+      blockchain[blockID].id,
+      blockchain[blockID].timeStemp,
+      blockchain[blockID].transaction,
+      blockchain[blockID].previousHash
+    );
 }
 tempereBlock();
-console.log(chain);
+console.log(blockchain);
 verification();
